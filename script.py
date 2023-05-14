@@ -2,6 +2,7 @@ import cv2
 from gtts import gTTS
 from playsound import playsound
 import screen_brightness_control as sbc
+from os.path import exists
 
 cap = cv2.VideoCapture(0)
 
@@ -19,11 +20,13 @@ hello_sound_name = 'hi.mp3'
 faceCascade = cv2.CascadeClassifier(cv2.data.haarcascades + 'haarcascade_frontalface_default.xml')
 
 # creating sounds
-audio = gTTS(text=hello_text, lang="en", slow=False)
-audio.save(hello_sound_name)
+if not exists(hello_sound_name):
+    audio = gTTS(text=hello_text, lang="en", slow=False)
+    audio.save(hello_sound_name)
 
-audio = gTTS(text=goodbye_text, lang="en", slow=False)
-audio.save(goodbye_sound_name)
+if not exists(goodbye_sound_name):
+    audio = gTTS(text=goodbye_text, lang="en", slow=False)
+    audio.save(goodbye_sound_name)
 
 # get initial brightness
 initial_brightness = sbc.get_brightness()
