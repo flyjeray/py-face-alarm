@@ -10,8 +10,10 @@ from math import ceil
 cap = cv2.VideoCapture(0)
 
 # some variables.
+# user_here shows if user is using pc
 # texts are what the Artificial Intelligence says
 # and sound_names are paths where mp3s are saved
+user_here = True
 goodbye_text = 'Goodbye'
 goodbye_sound_name = 'bye.mp3'
 hello_text = 'Hello'
@@ -32,20 +34,33 @@ if not exists(goodbye_sound_name):
 # get initial brightness
 initial_brightness = sbc.get_brightness()
 
+# to call thread only once
+thread_running = False
+
 def screensave(event: Event):
+	global user_here
+	global thread_running
+	
+	thread_running = True
+	
 	step1_await_time = 5
 	step1_await_frequency = 0.5
-	
-	playsound(goodbye_sound_name)
 	
 	for i in range(ceil(step1_await_time / step1_await_frequency)):
 		sleep(step1_await_frequency)
 		if (event.is_set()):
+			thread_running = False
 			return
+	
+	playsound(goodbye_sound_name)	
 	sbc.set_brightness(0)
+	user_here = False
+	thread_running = False
 	
 def main():
-	person_here = True
+	global user_here
+	global thread_running
+	
 	event = Event()
 	
 	while True:
@@ -64,17 +79,19 @@ def main():
 		)
 		
 		# when you leave the screen, start screensaver
-		if len(faces) == 0 and person_here:
+		if len(faces) == 0 and user_here and not thread_running:
 			event.clear()
 			thread = Thread(target=screensave, args=(event, ))
 			thread.start()
-			person_here = False
-		# when you come back, say hi and restore brightness
-		elif len(faces) > 0 and not person_here:
-			event.set()
-			playsound(hello_sound_name)
-			sbc.set_brightness(initial_brightness[0])
-			person_here = True
+		# when you come back, either break thread or, if it finished, say hi and restore brightness
+		elif len(faces) > 0:
+			if thread_running:
+				event.set()
+			elif not user_here:
+				event.set()
+				playsound(hello_sound_name)
+				sbc.set_brightness(initial_brightness[0])
+				user_here = True
 			
 		if cv2.waitKey(1) & 0xFF == ord('q'):
 			break
