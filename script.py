@@ -5,6 +5,7 @@ import screen_brightness_control as sbc
 from os.path import exists
 from time import sleep
 from threading import Thread, Event
+from math import ceil
 
 cap = cv2.VideoCapture(0)
 
@@ -32,11 +33,15 @@ if not exists(goodbye_sound_name):
 initial_brightness = sbc.get_brightness()
 
 def screensave(event: Event):
+	step1_await_time = 5
+	step1_await_frequency = 0.5
+	
 	playsound(goodbye_sound_name)
 	
-	sleep(5)
-	if (event.is_set()):
-		return
+	for i in range(ceil(step1_await_time / step1_await_frequency)):
+		sleep(step1_await_frequency)
+		if (event.is_set()):
+			return
 	sbc.set_brightness(0)
 	
 def main():
