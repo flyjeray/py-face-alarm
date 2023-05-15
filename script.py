@@ -21,12 +21,12 @@ faceCascade = cv2.CascadeClassifier(cv2.data.haarcascades + 'haarcascade_frontal
 
 # creating sounds
 if not exists(hello_sound_name):
-    audio = gTTS(text=hello_text, lang="en", slow=False)
-    audio.save(hello_sound_name)
+	audio = gTTS(text=hello_text, lang="en", slow=False)
+	audio.save(hello_sound_name)
 
 if not exists(goodbye_sound_name):
-    audio = gTTS(text=goodbye_text, lang="en", slow=False)
-    audio.save(goodbye_sound_name)
+	audio = gTTS(text=goodbye_text, lang="en", slow=False)
+	audio.save(goodbye_sound_name)
 
 # get initial brightness
 initial_brightness = sbc.get_brightness()
@@ -34,14 +34,10 @@ initial_brightness = sbc.get_brightness()
 def screensave(event: Event):
 	playsound(goodbye_sound_name)
 	
-	sleep(3)
-	if (event.is_set()):
-		return
-	sbc.set_brightness(0)
-	
 	sleep(5)
 	if (event.is_set()):
 		return
+	sbc.set_brightness(0)
 	
 def main():
 	person_here = True
