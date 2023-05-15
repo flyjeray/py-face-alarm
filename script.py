@@ -45,7 +45,6 @@ def screensave(event: Event):
 	
 def main():
 	person_here = True
-	thread = None
 	event = Event()
 	
 	while True:
