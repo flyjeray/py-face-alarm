@@ -1,35 +1,26 @@
 import cv2
 from gtts import gTTS
-from playsound import playsound
 import screen_brightness_control as sbc
 from os.path import exists
 from time import sleep
 from threading import Thread, Event
 from math import ceil
 
+import telebot
+import json
+
 cap = cv2.VideoCapture(0)
+
+PHOTO_PATH = 'photo.png'
+DATA_PATH = 'data.json'
+CONFIG_PATH = 'config.json'
 
 # some variables.
 # user_here shows if user is using pc
-# texts are what the Artificial Intelligence says
-# and sound_names are paths where mp3s are saved
 user_here = True
-goodbye_text = 'Goodbye'
-goodbye_sound_name = 'bye.mp3'
-hello_text = 'Hello'
-hello_sound_name = 'hi.mp3'
 
 # Create the haar cascade
 faceCascade = cv2.CascadeClassifier(cv2.data.haarcascades + 'haarcascade_frontalface_default.xml')
-
-# creating sounds
-if not exists(hello_sound_name):
-	audio = gTTS(text=hello_text, lang="en", slow=False)
-	audio.save(hello_sound_name)
-
-if not exists(goodbye_sound_name):
-	audio = gTTS(text=goodbye_text, lang="en", slow=False)
-	audio.save(goodbye_sound_name)
 
 # get initial brightness
 initial_brightness = sbc.get_brightness()
@@ -43,16 +34,15 @@ def screensave(event: Event):
 	
 	thread_running = True
 	
-	step1_await_time = 5
-	step1_await_frequency = 0.5
+	await_time = 5
+	await_frequency = 0.5
 	
-	for i in range(ceil(step1_await_time / step1_await_frequency)):
-		sleep(step1_await_frequency)
+	for i in range(ceil(await_time / await_frequency)):
+		sleep(await_frequency)
 		if (event.is_set()):
 			thread_running = False
 			return
 	
-	playsound(goodbye_sound_name)	
 	sbc.set_brightness(0)
 	user_here = False
 	thread_running = False
@@ -78,25 +68,42 @@ def main():
 			minSize=(30, 30)
 		)
 		
+		def send_photo():
+			if not (exists(DATA_PATH) and exists(CONFIG_PATH) and exists(PHOTO_PATH)):
+				return
+			
+			with open(DATA_PATH) as file:
+				data = json.load(file)
+			with open(CONFIG_PATH) as file:
+				config = json.load(file)
+			
+			bot = telebot.TeleBot(config['BOT_TOKEN'])
+			
+			with open(PHOTO_PATH, 'rb') as photo:
+				# Send the photo
+				bot.send_photo(data['CHAT_ID'], photo)
+		
 		# when you leave the screen, start screensaver
 		if len(faces) == 0 and user_here and not thread_running:
 			event.clear()
 			thread = Thread(target=screensave, args=(event, ))
 			thread.start()
-		# when you come back, either break thread or, if it finished, say hi and restore brightness
+		# when you come back, either break thread or, if it finished, restore brightness and send photo
 		elif len(faces) > 0:
 			if thread_running:
 				event.set()
 			elif not user_here:
 				event.set()
-				playsound(hello_sound_name)
 				sbc.set_brightness(initial_brightness[0])
 				user_here = True
+				cv2.imwrite(PHOTO_PATH, frame)
+				send_photo()
 			
 		if cv2.waitKey(1) & 0xFF == ord('q'):
 			break
 	# When everything done, release the capture
 	cap.release()
 	cv2.destroyAllWindows()
-	
-main()
+
+if __name__ == '__main__':
+	main()
