@@ -4,13 +4,15 @@ rename config_example.json to config.json and paste your telegram bot token ther
 
 use run.bat script to open both scripts (just saves time)
 
-### tie to chat
+## tie to chat
 
 after bot.py starts, run /start to activate bot and tie it to your chat.
 
 It won't retie to another chat until script is restarted.
 
-### control alarm
+After running script, it will save your ChatID - you will not need to run /start again.
+
+## control alarm
 
 run /enabled or /disabled commands in Telegram to control alarm.
 
