@@ -9,7 +9,7 @@ with open('config.json') as file:
 
 bot = telebot.TeleBot(config['BOT_TOKEN'])
 
-ENABLED = True
+ENABLED = False
 CHAT_ID = ''
 
 @bot.message_handler(commands=['start'])

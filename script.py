@@ -80,6 +80,8 @@ def main():
 			with open(PHOTO_PATH, 'rb') as photo:
 				# Send the photo
 				bot.send_photo(data['CHAT_ID'], photo)
+			
+			ctypes.windll.user32.LockWorkStation()
 		
 		# when you leave the screen, start screensaver
 		if len(faces) == 0 and user_here and not thread_running:
@@ -95,7 +97,6 @@ def main():
 				user_here = True
 				cv2.imwrite(PHOTO_PATH, frame)
 				send_photo()
-				ctypes.windll.user32.LockWorkStation()
 			
 		if cv2.waitKey(1) & 0xFF == ord('q'):
 			break
