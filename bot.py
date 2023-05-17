@@ -17,12 +17,9 @@ CHAT_ID = ''
 def start(message):
 	global CHAT_ID
 	
-	if CHAT_ID is not '':
+	if CHAT_ID == '':
 		bot.reply_to(message, "Bot activated")
 		CHAT_ID = message.chat.id
-		if not exists(DATA_PATH):
-			with open(DATA_PATH, 'w') as file:
-				json.dump({}, file)
 		with open(DATA_PATH, 'w') as f:
 			json.dump({'CHAT_ID': CHAT_ID}, f)
 
