@@ -76,6 +76,9 @@ def main():
 				data = json.load(file)
 			with open(CONFIG_PATH) as file:
 				config = json.load(file)
+				
+			if data['ENABLED'] == 'False':
+				return
 			
 			bot = telebot.TeleBot(config['BOT_TOKEN'])
 			
