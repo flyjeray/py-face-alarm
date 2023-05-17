@@ -1,10 +1,9 @@
 import cv2
-from gtts import gTTS
-import screen_brightness_control as sbc
 from os.path import exists
 from time import sleep
 from threading import Thread, Event
 from math import ceil
+import ctypes
 
 import telebot
 import json
@@ -22,13 +21,10 @@ user_here = True
 # Create the haar cascade
 faceCascade = cv2.CascadeClassifier(cv2.data.haarcascades + 'haarcascade_frontalface_default.xml')
 
-# get initial brightness
-initial_brightness = sbc.get_brightness()
-
 # to call thread only once
 thread_running = False
 
-def screensave(event: Event):
+def user_leave_event(event: Event):
 	global user_here
 	global thread_running
 	
@@ -43,7 +39,6 @@ def screensave(event: Event):
 			thread_running = False
 			return
 	
-	sbc.set_brightness(0)
 	user_here = False
 	thread_running = False
 	
@@ -89,7 +84,7 @@ def main():
 		# when you leave the screen, start screensaver
 		if len(faces) == 0 and user_here and not thread_running:
 			event.clear()
-			thread = Thread(target=screensave, args=(event, ))
+			thread = Thread(target=user_leave_event, args=(event, ))
 			thread.start()
 		# when you come back, either break thread or, if it finished, restore brightness and send photo
 		elif len(faces) > 0:
@@ -97,10 +92,10 @@ def main():
 				event.set()
 			elif not user_here:
 				event.set()
-				sbc.set_brightness(initial_brightness[0])
 				user_here = True
 				cv2.imwrite(PHOTO_PATH, frame)
 				send_photo()
+				ctypes.windll.user32.LockWorkStation()
 			
 		if cv2.waitKey(1) & 0xFF == ord('q'):
 			break
