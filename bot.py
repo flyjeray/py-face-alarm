@@ -70,6 +70,9 @@ if exists(DATA_PATH):
 	with open(DATA_PATH) as file:
 		data = json.load(file)
 		CHAT_ID = data['CHAT_ID']
+		data['ENABLED'] = 'False'
+		with open(DATA_PATH, 'w') as f:
+			json.dump(data, f)
 
 if __name__ == '__main__':
 	bot.infinity_polling()
