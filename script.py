@@ -14,14 +14,13 @@ PHOTO_PATH = 'photo.png'
 DATA_PATH = 'data.json'
 CONFIG_PATH = 'config.json'
 
-# some variables.
 # user_here shows if user is using pc
 user_here = True
 
 # Create the haar cascade
 faceCascade = cv2.CascadeClassifier(cv2.data.haarcascades + 'haarcascade_frontalface_default.xml')
 
-# to call thread only once
+# To call thread only once
 thread_running = False
 
 def user_leave_event(event: Event):
@@ -30,6 +29,8 @@ def user_leave_event(event: Event):
 	
 	thread_running = True
 	
+	# Time - delay between user is confirmed to leave
+	# Frequency - how often should it be checked until confirming
 	await_time = 5
 	await_frequency = 0.5
 	
@@ -83,12 +84,12 @@ def main():
 			
 			ctypes.windll.user32.LockWorkStation()
 		
-		# when you leave the screen, start screensaver
+		# When user leaves, start user_leave_event thread
 		if len(faces) == 0 and user_here and not thread_running:
 			event.clear()
 			thread = Thread(target=user_leave_event, args=(event, ))
 			thread.start()
-		# when you come back, either break thread or, if it finished, restore brightness and send photo
+		# When face is detected, break thread or, if thread is finished, send photo and lock screen
 		elif len(faces) > 0:
 			if thread_running:
 				event.set()

@@ -26,45 +26,38 @@ def start(message):
 			json.dump(data, f)
 	else:
 		bot.reply_to(message, "Bot is already tied to another chat")
+		
+def toggle_enabled(message, value: bool):
+	global ENABLED
+	ENABLED = value
+	bot.reply_to(message, "Enabled" if value else "Disabled" )
+	with open(DATA_PATH) as file:
+		data = json.load(file)
+		data['ENABLED'] = str(ENABLED)
+		with open(DATA_PATH, 'w') as f:
+			json.dump(data, f)
 			
 @bot.message_handler(commands=['enable'])
 def enable(message):
-	global ENABLED
-	
 	if message.chat.id != CHAT_ID:
 		bot.reply_to(message, "You have no access to this bot.")
 		return
 	
 	if not ENABLED:
-		ENABLED = True
-		bot.reply_to(message, "Enabled")
-		with open(DATA_PATH) as file:
-			data = json.load(file)
-			data['ENABLED'] = str(ENABLED)
-			with open(DATA_PATH, 'w') as f:
-				json.dump(data, f)
+		toggle_enabled(message, True)
 	else:
 		bot.reply_to(message, "Already enabled")
 		
 @bot.message_handler(commands=['disable'])
 def disable(message):
-	global ENABLED
-	
 	if message.chat.id != CHAT_ID:
 		bot.reply_to(message, "You have no access to this bot.")
 		return
 	
 	if ENABLED:
-		ENABLED = False
-		bot.reply_to(message, "Disabled")
-		with open(DATA_PATH) as file:
-			data = json.load(file)
-			data['ENABLED'] = str(ENABLED)
-			with open(DATA_PATH, 'w') as f:
-				json.dump(data, f)
+		toggle_enabled(message, False)
 	else:
 		bot.reply_to(message, "Already disabled")
-
 
 if exists(DATA_PATH):
 	with open(DATA_PATH) as file:
