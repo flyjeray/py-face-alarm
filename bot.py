@@ -24,6 +24,8 @@ def start(message):
 			data['CHAT_ID'] = CHAT_ID
 			data['ENABLED'] = str(ENABLED)
 			json.dump(data, f)
+	elif CHAT_ID == message.chat.id:
+		bot.reply_to(message, "Bot is already tied to this chat")
 	else:
 		bot.reply_to(message, "Bot is already tied to another chat")
 		
